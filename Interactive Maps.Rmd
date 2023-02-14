@@ -1,0 +1,113 @@
+---
+title: "`r params$doc_title`"
+author: "Brian Erly, MD MPH"
+date: "`r Sys.Date()`"
+output: html_document
+params:
+  county: DENVER
+  doc_title: Denver County Interactive 
+  county_is_region: TRUE
+---
+
+```{r setup and data, include=FALSE}
+source(file = "r_scripts/01_libraries and functions.R")
+source(file = "r_scripts/00_secrets.R")
+
+county_tract_ids <- read_csv("data/county_tract_ids.csv")
+
+options(tigris_use_cache = TRUE)
+
+suppressMessages({
+geom_with_age <- get_acs(
+  geography = "tract",
+  state = "CO",
+  variables = c(
+    Under_18 = "B09001_001"
+
+  ),
+  year = 2017,
+  geometry = TRUE
+) %>%
+  mutate(TractID = as.numeric(GEOID)) %>%
+  mutate(Under_18 = estimate) %>%
+  select(TractID, NAME,Under_18,geometry)
+}
+)
+
+predictions <- read_csv("data/model predictions.csv",
+  show_col_types = FALSE)
+
+Pediatric_Vaccine_Index <- read_csv("data/Pediatric_Vaccine_Index.csv",
+  show_col_types = FALSE) %>%
+  left_join(county_tract_ids) %>%
+  left_join(geom_with_age) %>%
+  left_join(predictions)
+
+Pediatric_Vaccine_Index_County <- Pediatric_Vaccine_Index %>%
+    filter(COUNTY %in% params$county) 
+
+
+Colorado_data_mr <- read_csv("data/Colorado_data_mr.csv",
+  show_col_types = FALSE) %>%
+  left_join(county_tract_ids) %>%
+  filter(COUNTY %in% params$county) %>%
+  left_join(geom_with_age)%>%
+  left_join(predictions)
+
+Colorado_data_mr_County <- Colorado_data_mr %>%
+    filter(COUNTY %in% params$county) 
+
+
+county_data <- read_csv(
+  sprintf("https://docs.google.com/uc?id=%s&export=download",
+    "1cjLn3Qkvs8hNJDGzCuqrDzbeNechUmkW"
+  ),
+  show_col_types = FALSE
+) %>% mutate(
+  COUNTY = toupper(County)
+) 
+
+county_spdf <- sf::st_transform(Pediatric_Vaccine_Index_County$geometry,crs = "+init=epsg:4326")
+
+```
+
+## Overall Pediatric COVID-19 Vaccination Rates
+
+This is a map of all of Colorado.
+
+```{r cars}
+
+p1 <- Pediatric_Vaccine_Index %>%
+ ggplot(aes(fill = PERCENT_VAX_0_17,geometry = geometry,
+            text = paste("tract:", Pediatric_Vaccine_Index$TractID))) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "E",
+      breaks=c(0,25,50,75,100), name="Vaccination Rate", 
+      guide = guide_legend( keyheight = unit(5, units = "mm"), 
+                            keywidth=unit(12, units = "mm"), 
+                            label.position = "bottom", 
+                            title.position = 'top', nrow=1) ) +
+  labs(title = "",
+       subtitle = "") +
+  theme(
+    legend.position = "bottom"
+  )
+
+fig <- plotly::ggplotly(p1)
+
+
+
+fig
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

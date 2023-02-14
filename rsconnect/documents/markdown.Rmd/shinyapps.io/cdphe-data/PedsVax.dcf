@@ -1,0 +1,13 @@
+name: PedsVax
+title: PedsVax
+username:
+account: cdphe-data
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6698729
+bundleId: 6136162
+url: https://cdphe-data.shinyapps.io/PedsVax/
+when: 1658871149.60549
+lastSyncTime: 1658871149.60549
+asMultiple: FALSE
+asStatic: FALSE

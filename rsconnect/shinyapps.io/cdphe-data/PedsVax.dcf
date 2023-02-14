@@ -1,0 +1,14 @@
+name: PedsVax
+title:
+username:
+account: cdphe-data
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6698729
+bundleId: 6564165
+url: https://cdphe-data.shinyapps.io/PedsVax/
+when: 1669666453.13493
+lastSyncTime: 1669666453.13493
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: all acs concepts.csv|Bus scripts/Bus Location Analysis Proof of Concept.R|Bus scripts/Bus Location Analysis.R|Bus scripts/Bus Location Data Compiler.R|Bus scripts/Bus Location Geocoder.R|county_report.html|county_report.pdf|county_report.Rmd|depreciated markdown.Rmd|Health Belief Model COVID Peds Vaccines.png|Interactive-Maps.html|Interactive Maps.Rmd|Markdown Controller.R|markdown.html|markdown.nb.html|markdown.pdf|markdown_code/output/Report - DENVER COUNTY Pediatric Vacccination - 2022-08-16.pdf|Pediatric COVID Vaccine Analysis Conceptual Model.png|Peds_Vaccine_SDH_CO/.gitignore|Peds_Vaccine_SDH_CO/app.R|README.md|Who vax at busses/Bus vaccine population analysis.R

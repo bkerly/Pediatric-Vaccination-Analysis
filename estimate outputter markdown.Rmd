@@ -1,0 +1,1269 @@
+---
+title: "Colorado Pediatric Vaccine Analysis"
+author: "Brian Erly, MD MPH; Shannon O'Brien, MD MPH"
+date: "`r lubridate::today()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source(file = "r_scripts/01_libraries and functions.R")
+source(file = "r_scripts/00_secrets.R")
+
+library(rpart)
+library(randomForest)
+library(rpart.plot)
+
+
+```
+
+## Introduction
+
+The purpose of this analysis is to understand the factors which influence the uptake of the COVID vaccine among children and adolescents in Colorado. 
+
+The factors which influence vaccine uptake can be conceptually divided into two categories. The first category are  factors which are essentially non-modifiable (at least with respect to public health interventions). These include:  
+* Where a person lives and what their family income is  
+* Underlying health status  
+* What a person's racial/ethnic background is  
+* Whether a person has health insurance or lives near a hospital  
+* Where a person gets their news and information  
+
+Other modifiable factors might include  
+* Messaging received around vaccines  
+* Availability of transportation to the vaccine  
+* Workplace vaccine mandates or requirements  
+* Perceived risk of COVID-19  
+
+Identifying the underlying non-modifiable risk factors allows public health workers to first understand why vaccine uptake might be higher or lower in certain areas of the state. Next, we can identify over- or under-performing counties or regions to better understand the effects of modifiable risk factors. Finally, this information may help target interventions more effectively.  
+
+To approach this, we will use a combination of linear modeling and published frameworks for vaccine uptake to identify 
+
+```{r load data, echo=FALSE, message=FALSE, results=FALSE}
+
+COVID_vaccine_tract <- read_csv("data/CDPHE Data/Tract COVID Vaccine Data.csv",
+                                show_col_types = FALSE)
+
+nonCOVID_vaccine_county <- read_csv("data/CDPHE Data/County NonCOVID Vaccine Data.csv",
+                                    show_col_types = FALSE) %>% 
+  rename(COUNTY = CountyID,
+         MMR = `MMR_2-18`,
+         HPV = `HPV_13-17`,
+         PedsFlu = `Flu2019_0-18`,
+         AllFlu = `Flu2019_all`)
+
+
+COVID_provider_tract <- read_csv("data/CDPHE Data/Tract Vaccine Provdiers by Tract.csv",
+                                   show_col_types = FALSE) %>%
+  rename(providers_tract = COVID_Vaccine_providers)
+
+COVID_provider_county <- COVID_provider_tract %>%
+  mutate(FIPS = as.character(TractID) %>%
+           substr(1,4) %>%
+           paste0("0",.)) %>%
+  group_by(FIPS) %>%
+  summarize(providers_county = sum(providers_tract))
+
+HSA_assignments <- readxl::read_excel("data/HSA/Health.Service.Areas.xls") %>%
+  filter(`State-county` %>% startsWith("CO:")) %>%
+  filter(`State-county` %!in% 
+           c("CO: Boulder before Broomfield (08912) - 1969-2001",
+             "CO: Adams before Broomfield (08911) - 1969-2001",
+             "CO: Jefferson before Broomfield (08913) - 1969-2001",
+             "CO: Weld before Broomfield (08914) - 1969-2001")
+  ) %>%
+  mutate(COUNTY = str_replace(`State-county`,"CO: ","") %>%
+           str_remove(" County.*") %>%
+           toupper()) %>%
+   rename(HSA_id = 1)
+
+HSA_capacity <- read_csv("data/HSA/FIPS_HSA_capacity_data.csv",
+                                   show_col_types = FALSE)  %>%
+  group_by(HSA_id) %>%
+  summarize(HSA_beds = sum(beds)) %>%
+  right_join(HSA_assignments) %>%
+ replace_na(list(HSA_beds=0))
+
+election_2020_county <- read_csv("data/Presidential/countypres_2000-2020.csv",
+                                   show_col_types = FALSE) %>%
+  filter(state_po %in% "CO") %>% 
+  rename(FIPS = county_fips) %>%
+  filter(year == 2020) %>%
+  filter(candidate == "JOSEPH R BIDEN JR") %>%
+  select(FIPS,candidate,candidatevotes,totalvotes) %>%
+  mutate(pctBiden = candidatevotes/totalvotes)
+
+SVI_tract <- read_csv("data/SVI/SVI2018_CO_TRACTS.csv",
+                                   show_col_types = FALSE) %>%
+  mutate(FIPS = as.numeric(FIPS)) %>%
+  transmute(COUNTY = toupper(COUNTY),
+            FIPS = FIPS,
+            TRACT_POP = E_TOTPOP,
+            HOUSING_UNITS = E_HU,
+            HOUSEHOLDS = E_HH,
+            SES_BELOW_POV = EP_POV,
+            SES_UNEMPLOYED = EP_UNEMP,
+            SES_INCOME = EP_PCI,
+            SES_NO_HS = EP_NOHSDP,
+            HHCOMP_AGE65 = EP_AGE65,
+            HHCOMP_AGE17 = EP_AGE17,
+            HHCOMP_DISABILITY = EP_DISABL,
+            HHCOMP_SING_PARENT = EP_SNGPNT,
+            MINORITY_MINORITY = EP_MINRTY,
+            MINORITY_NONENGLISH = EP_LIMENG,
+            HOUSING_MULTIUNIT = EP_MUNIT,
+            HOUSING_MOBILE = EP_MOBILE,
+            HOUSING_CROWDED = EP_CROWD,
+            HOUSING_NO_VEHICLE = EP_NOVEH,
+            HOUSING_GROUP_QUARTERS = EP_GROUPQ,
+            UNINSURED = EP_UNINSUR,
+            DAYTIME_POP = E_DAYPOP,
+            SES = SPL_THEME1,
+            HHCOMP = SPL_THEME2,
+            MINORITY = SPL_THEME3,
+            HOUSING = SPL_THEME4) %>%
+  na_if(.,-999)
+
+SVI_county <- read_csv("data/SVI/SVI2018_US_COUNTY.csv",
+                                   show_col_types = FALSE) %>%
+  na_if(-999)
+
+county_pop <- SVI_county %>%
+  transmute(FIPS = FIPS, 
+            
+            COUNTY_POP = E_TOTPOP)
+
+# PM25_county <- read_csv("data/Air Quality/PM25 2018.csv") %>%
+#   group_by(county_fips) %>%
+#   summarize(PM25_days = mean(days_over_standard,na.rm=TRUE)) %>%
+#   rename(FIPS = county_fips)
+# 
+# O3_county <- read_csv("data/Air Quality/Ozone 2018.csv") %>%
+#   group_by(county_fips) %>%
+#   summarize(O3_days = mean(days_over_standard,na.rm=TRUE)) %>%
+#   rename(FIPS = county_fips)
+
+compiled_county_data <- nonCOVID_vaccine_county %>%
+  left_join(HSA_capacity,by="COUNTY") %>%
+  left_join(election_2020_county,by="FIPS") %>%
+  left_join(COVID_provider_county,by="FIPS") %>%
+  left_join(county_pop,by="FIPS") %>%
+ # left_join(PM25_county,by="FIPS") %>%
+#  left_join(O3_county,by="FIPS") %>%
+#  left_join(SVI_county,by=c("FIPS","COUNTY")) %>%
+  select(-`Health Service Area (NCI Modified) Description`,
+         -`State-county`,
+         -candidate,
+         -candidatevotes#,
+         # -ST,
+         # -STATE,
+         # -ST_ABBR,
+         # -LOCATION
+         ) %>%
+  mutate(providers_county = 1000 * providers_county/COUNTY_POP)
+
+suppressMessages({
+geom_with_age <- get_acs(
+  geography = "tract",
+  state = "CO",
+  variables = c(
+    Under_18 = "B09001_001"
+    
+  ),
+  year = 2017,
+  geometry = TRUE
+) %>%
+  mutate(TractID = as.numeric(GEOID)) %>%
+  mutate(Under_18 = estimate) %>%
+  select(TractID, NAME,Under_18,geometry)
+}
+)
+
+compiled_tract_data <- COVID_vaccine_tract %>%
+  left_join(COVID_provider_tract,by="TractID") %>%
+  left_join(SVI_tract,by=c("TractID"="FIPS"))  %>%
+  left_join(geom_with_age,by=c("TractID")) %>%
+  mutate(COUNTY = toupper(COUNTY))
+
+Colorado_data <- compiled_tract_data %>%
+  left_join(compiled_county_data,by="COUNTY") %>%
+  mutate(providers_tract = replace_na(providers_tract,0)) %>%
+  mutate(TRACT_POP = POP_TOTAL) %>%
+  mutate(Under_18 = POP_AGE_0_17) %>%
+  select(-NAME)#%>%
+ # filter(!is.na(PERCENT_VAX_0_17)) %>%
+ # filter(TRACT_POP > 0)
+
+  glue::glue(
+    "
+    Data for {nrow(Colorado_data)} census tracts loaded.
+    
+    A total of {sum(apply(Colorado_data, 1, anyNA))} census tracts have incomplete data and must be imputed.
+    "
+  ) %>%
+    print()
+  
+ summary(Colorado_data)
+
+  
+library(missRanger)
+  # cf https://yuzar-blog.netlify.app/posts/2021-03-04-how-to-impute-missing-values-in-r/
+  Colorado_data_mr <- missRanger::missRanger(
+    Colorado_data %>% select(-geometry),
+    formula = . ~ .,
+    num.trees = 1000, 
+    verbose = 2,
+    seed = 111,
+    returnOOB = T
+  ) %>%
+    mutate(geometry = Colorado_data$geometry)
+  
+  ggplot()+
+  geom_point(data = Colorado_data_mr, aes(SES_BELOW_POV, UNINSURED), 
+             color = "red")+
+  geom_point(data = Colorado_data, aes(SES_BELOW_POV, UNINSURED))+
+  theme_minimal()+
+  labs(title = "Imputed Variables Example",
+       data = "Red Points are Imputed") 
+  
+  
+write_csv(Colorado_data_mr %>% select(-geometry), "data/Colorado_data_mr.csv")
+
+```
+
+
+``` {r How many tracts, echo=FALSE}
+  glue::glue(
+    "
+    Data for {nrow(Colorado_data)} census tracts loaded.
+    "
+  ) %>%
+    print()
+```
+
+## Basic Graphs
+
+Data has been loaded. This includes the following data elements:  
+
+* COVID vaccination rates by age group and census tract
+* COVID vaccination providers by census tract
+* 2020 presidential election results
+* Health Service Area hospital capacity
+* Non-COVID vaccine rates by county for MMR, HPV, and 2019 Influenza
+* Social Vulnerability Index data
+
+```{r plots, echo=FALSE, message=FALSE}
+Colorado_data %>%
+  ggplot(aes(x=`PERCENT_VAX_0_17`)
+         ) +
+  geom_histogram(aes(fill=`PERCENT_VAX_0_17`),bins = 30) +
+  ylab("Census Tracts")+
+  xlab("Percent Vaccination")+
+  labs(title = "Histogram of Colorado Vaccination Rate (Age 0-17) by Census Tract")
+
+library(viridis)
+Colorado_data %>%
+  ggplot(aes(fill = `PERCENT_VAX_0_17`,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(trans = "log", breaks=c(1,5,10,20,50,100), name="Percent Vaccination", guide = guide_legend( keyheight = unit(3, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Percent Vaccination Age 0-17") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  ) 
+
+
+Colorado_data %>%
+  ggplot(aes(fill = `PERCENT_VAX_0_17`,geometry = geometry)) +
+  geom_sf()+
+  xlim(-105.332,-104.559)+
+  ylim(39.321,40.072)+
+  labs(title = "Percent Vaccination Age 0-17",
+       subtitle = "Denver Metro Area") 
+
+
+
+```
+
+
+## Linear Model
+
+Using the available data, we can create a predicted vaccination rate for each census tract in Colorado using a linear model. This model creates a predicted vaccination rate based on non-modifiable factors for each census tract. By comparing the true vaccination rate with the predicted vaccination rate, we can identify under- and over-performing regions of the state. 
+
+The variables in the full model include the following:
+
+   * SES_BELOW_POV: Percent of individuals with household income below poverty line (from SVI)  
+   * SES_UNEMPLOYED: Percent of individuals age 16+ who areunemployed (from SVI)  
+   * SES_INCOME: Household income (from SVI)  
+   * SES_NO_HS: Percent of individuals 25+ with no high school diploma (from SVI)  
+   * HHCOMP_AGE65: Percent of individuals aged 65 and older (from SVI)  
+   * HHCOMP_AGE17: Percent of individuals aged 17 and younger (from SVI)  
+   * HHCOMP_DISABILITY: Percent of individuals with a disability (from SVI)  
+   * HHCOMP_SING_PARENT: Percent of households with children under 18 with only one parent present (from SVI)  
+   * MINORITY_MINORITY: Percent of individuals who are not nonhispanic White (from SVI)  
+   * MINORITY_NONENGLISH: Percent of individuals age 5+ who speak English "less than well" (from SVI)  
+   * HOUSING_MULTIUNIT: Percent of households in a structure with 10 or more households (from SVI)  
+   * HOUSING_MOBILE: Percent of households that are mobile homes (from SVI)  
+   * HOUSING_CROWDED: Percent of households with more people than rooms (from SVI)
+   * HOUSING_NO_VEHICLE: Percent of households with no vehicle (from SVI)  
+   * HOUSING_GROUP_QUARTERS: Percent of persons in institutionalized group quarters (from SVI)  
+   * UNINSURED: Percent of individuals who are uninsured (from SVI)  
+   * MMR+: Percent of individuals aged 2-18 who are up-to-date on MMR vaccination (from CDPHE)  
+   * HPV+: Percent of individuals aged 3-17 who received an HPV shot  (from CDPHE) 
+   * PedsFlu: Percent of individuals 17 and under who received an influenza vaccine in the 2019-2020 flu season (from CDPHE)  
+   * AllFlu: Percent of individuals who received an influenza vaccine in the 2019-2020 flu season (from CDPHE)  
+   * HSA_beds: Number of bed in the county Health Service Area (from SEER)
+  * pctBiden: Percent of individuals with household income below poverty line (from New York Times)
+  * providers_county: Number of COVID vaccine providers in the county per 1000 (from CDPHE)
+    
+A reduced model was also developed using backwards automated model selection.
+  
+
+```{r create model, echo=FALSE, message = FALSE}
+
+model_data <- Colorado_data %>%
+  remove_missing() %>%
+  mutate(across(c(HOUSING_UNITS:HOUSING,MMR:HSA_beds,totalvotes:COUNTY_POP), scale)) 
+  
+
+model <- lm(
+  PERCENT_VAX_0_17 ~ 
+  SES_BELOW_POV  +
+  SES_UNEMPLOYED  +
+  SES_INCOME  +
+  SES_NO_HS  +
+  HHCOMP_AGE65  +
+  HHCOMP_AGE17  +
+  HHCOMP_DISABILITY  +
+  HHCOMP_SING_PARENT  +
+  MINORITY_MINORITY  +
+  MINORITY_NONENGLISH  +
+  HOUSING_MULTIUNIT  +
+  HOUSING_MOBILE  +
+  HOUSING_CROWDED  +
+  HOUSING_NO_VEHICLE  +
+  HOUSING_GROUP_QUARTERS  +
+  UNINSURED  +
+  `MMR`+
+  `HPV`+
+  `PedsFlu`+
+   AllFlu+
+    HSA_beds+
+    pctBiden +
+    providers_county#+
+  #O3_days+
+  #  PM25_days
+  ,
+  #offset = log(Under_18),
+  
+  data = model_data,
+  weights = Under_18
+  #family = "poisson"
+)
+
+summary(model) %>%
+  print()
+
+
+plot(x=predict(model),y=model_data$PERCENT_VAX_0_17,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values, Full Model')
+
+print("Now we will create a reduced model using backwards stepwise model selection.")
+
+
+model_small <- step(model, direction = "backward",
+                    trace = -1) %>%
+  invisible()
+
+summary(model_small)%>%
+  print()
+
+model_small$coefficients %>%
+  data.frame() %>%
+  rownames_to_column(var = "Variable") %>%
+  `colnames<-`(c("Variable","Weight")) %>%
+  filter(Variable != "(Intercept)") %>%
+  arrange(desc(Weight)) %>%
+  mutate(Weight = abs(Weight))
+
+plot(x=predict(model_small),y=model_data$PERCENT_VAX_0_17,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values, Small Model')
+
+model_data %>%
+  select(TractID) %>%
+  mutate(prediction = predict(model_small) %>%
+           pmax(0)) %>%
+  write_csv("data/model predictions.csv")
+
+```
+
+## Then we make a map because Shannon asked me to
+
+```{r model_fit_map}
+
+model_fit_graph_df <- model_data %>%
+  mutate(model_prediction = predict(model_small)) %>%
+  rowwise() %>%
+  mutate(model_error = sqrt(
+    mean(
+      (PERCENT_VAX_0_17 - model_prediction)^2
+      )
+         )
+         ) %>%
+  ungroup() %>%
+  left_join(Colorado_data %>% select(TractID,geometry))
+
+model_fit_graph_df  %>%
+  ggplot(aes(x=`model_error`)
+         ) +
+  geom_histogram(bins = 30) +
+  ylab("Census Tracts")+
+  xlab("Root Mean Square Error")+
+  labs(title = "Histogram of Model Error",
+       subtitle = "Greater Error indicates Greater Effect of Unexamined Variables") +
+  xlim(0,100)
+
+# https://r-graph-gallery.com/327-chloropleth-map-from-geojson-with-ggplot2.html
+model_fit_graph_df %>%
+  ggplot(aes(fill = `model_error`,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(breaks=c(1,3,5,10,25,50), name="Model Error", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Model Error",
+       subtitle = "Root Mean Square") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  ) 
+
+model_fit_graph_df %>%
+  ggplot(aes(fill = `model_error`,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(breaks=c(1,3,5,10,25,50), name="Model Error", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Model Error",
+       subtitle = "Root Mean Square") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  ) +
+  xlim(-105.332,-104.559)+
+  ylim(39.321,40.072)+
+  labs(title = "Model Error",
+       subtitle = "Denver Metro Area") 
+
+```
+
+## Random Forest
+This does machine learning! Suffice to say that it is a neat mthodology.
+
+Importance graph:
+* Mean Decrease Accuracy (%IncMSE) - This shows how much our model accuracy decreases if we leave out that variable.  
+* Mean Decrease Gini (IncNodePurity) - This is a measure of variable importance based on the Gini impurity index used for the calculating the splits in trees.  
+
+The higher the value of mean decrease accuracy or mean decrease gini score, the higher the importance of the variable to our model.
+
+
+```{r random forest, echo = FALSE, eval=TRUE, warning=FALSE, include=TRUE, results = TRUE}
+formula <- PERCENT_VAX_0_17 ~ 
+  SES_BELOW_POV  +
+  SES_UNEMPLOYED  +
+  SES_INCOME  +
+  SES_NO_HS  +
+  HHCOMP_AGE65  +
+  HHCOMP_AGE17  +
+  HHCOMP_DISABILITY  +
+  HHCOMP_SING_PARENT  +
+  MINORITY_MINORITY  +
+  MINORITY_NONENGLISH  +
+  HOUSING_MULTIUNIT  +
+  HOUSING_MOBILE  +
+  HOUSING_CROWDED  +
+  HOUSING_NO_VEHICLE  +
+  HOUSING_GROUP_QUARTERS  +
+  UNINSURED  +
+  MMR +
+  HPV +
+  PedsFlu+
+  AllFlu+
+  HSA_beds+
+  pctBiden +
+  providers_county
+
+dtree<- rpart(formula,data=model_data,method="poisson",control=rpart.control(minsplit=30,cp=0.001,
+                                                                             maxdepth = 4))
+
+rpart.plot::rpart.plot(dtree)
+
+
+#Prune the Tree and Plot
+pdtree<- prune(dtree, cp=dtree$cptable[which.min(dtree$cptable[,"xerror"]),"CP"])
+plot(pdtree, uniform=TRUE,
+     main="Pruned Classification Tree For Sales")
+text(pdtree, use.n=TRUE, all=TRUE, cex=.8)
+
+
+modelRF <- randomForest::randomForest(PERCENT_VAX_0_17 ~ 
+  SES_BELOW_POV  +
+  SES_UNEMPLOYED  +
+  SES_INCOME  +
+  SES_NO_HS  +
+  HHCOMP_AGE65  +
+  HHCOMP_AGE17  +
+  HHCOMP_DISABILITY  +
+  HHCOMP_SING_PARENT  +
+  MINORITY_MINORITY  +
+  MINORITY_NONENGLISH  +
+  HOUSING_MULTIUNIT  +
+  HOUSING_MOBILE  +
+  HOUSING_CROWDED  +
+  HOUSING_NO_VEHICLE  +
+  HOUSING_GROUP_QUARTERS  +
+  UNINSURED  +
+   MMR+
+   HPV+
+   PedsFlu+ 
+   AllFlu +
+  HSA_beds +
+  pctBiden +
+  providers_county
+  ,
+  data=model_data,
+  importance = TRUE,
+  ntree = 500)
+
+print(modelRF)
+
+summary(modelRF)
+
+#https://stats.stackexchange.com/questions/12605/measures-of-variable-importance-in-random-forests
+importance(modelRF)
+
+
+
+plot(modelRF)
+
+importance(modelRF)
+
+varImpPlot(modelRF,main = "Variable Importance, Random Forest Model",n.var = 10,type = 1)
+
+plot(x=predict(modelRF),y=model_data$PERCENT_VAX_0_17,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values, Random Forest Model')
+
+```
+
+
+
+
+## Causal model
+The next thing we do, after all that machine learning, is to actually implement some kind of model. Here's the model:
+![Health Belief Model](Health Belief Model COVID Peds Vaccines.png)
+
+```{r causal relationships,echo=FALSE,warning=FALSE,message=FALSE}
+
+variable_class <- read_csv("data/Variable Classifications.csv") %>%
+  `colnames<-`(c("Variable","Classification"))
+
+model_coefficients <- summary(model_small)$coefficients %>%
+  as.table() %>%
+  as.data.frame() %>%
+  `colnames<-`(c("Variable","Metric","Value")) %>%
+  filter(Metric %in% "Estimate",
+         "Variable" %!in% "(Intercept)") %>%
+  transmute(Variable = as.character(Variable),
+            Estimate = Value)
+
+predictions <- model_data %>% 
+  select(TractID) %>%
+  mutate(Prediction = predict(model))
+
+scale_this <- function(x){
+  function(x) as.vector(scale(x))
+}
+
+cat_data <- model_data %>%
+  select(c(HOUSING_UNITS:HOUSING,MMR:HSA_beds,totalvotes:COUNTY_POP, TractID)) %>%
+  pivot_longer(-TractID,names_to = "Variable",values_to = "Value") %>%
+  left_join(model_coefficients,by="Variable") %>%
+  left_join(variable_class,by="Variable") %>%
+  filter(Variable %in% variable_class$Variable) %>%
+  mutate(Effect = `Value` * Estimate) %>% 
+  group_by(TractID,Classification) %>%
+  summarize(Effect = sum(Effect,na.rm = TRUE)) %>%
+  pivot_wider(names_from="Classification",values_from = "Effect") %>%
+  left_join(predictions, by="TractID") %>%
+  ungroup() %>%
+  mutate(Barriers =  scales::rescale(Barriers,to = c(0,1)),
+         Benefits = scales::rescale(Benefits,to = c(0,1)),
+         Cues = scales::rescale(Cues,to = c(0,1)),
+         Demographic = scales::rescale(Demographic,to = c(0,1)),
+         Susceptibility = scales::rescale(Susceptibility,to = c(0,1))
+         )
+# 
+# library(leaflet)
+# library(shiny)
+# 
+# 
+# map_data <- cat_data %>%
+#    left_join(Colorado_data %>% select(TractID,geometry,PERCENT_VAX_0_17))  %>%
+#   rename(Pediatric_Vax_Rate = PERCENT_VAX_0_17)
+# 
+# shapes <- as(map_data$geometry,"Spatial")
+# 
+# ids <- sapply(slot(shapes, "polygons"), function(x) slot(x, "ID")) 
+# 
+# rownames(map_data) <- ids
+# 
+# map_data <- sp::SpatialPolygonsDataFrame(shapes, map_data)
+# 
+# 
+# 
+# 
+# shinyApp(
+#   ui = fluidPage(
+#     selectInput("variable", "Plot Variable:",
+#                 choices = colnames(map_data@data %>%
+#                                      select_if(is.numeric) %>%
+#                                      select(-TractID)
+#                                    )
+#                 ),
+#     leafletOutput("COMap")
+#   ),
+#   
+#   server = function(input, output) {
+#     
+#     variable_to_map <- reactive({
+#     input$variable
+#   })
+#     
+#     output$COMap <- renderLeaflet({
+#     
+#     leaflet(options = leafletOptions(zoomControl = TRUE)) %>%
+#       addProviderTiles(providers$Stamen.TonerLite) %>%
+#       setView(lat = 39.7, lng = -105, zoom = 6)
+#     
+#   })
+#     
+# 
+#     
+#     observeEvent(input$variable, {
+# 
+#     pal <- colorNumeric("viridis", range(map_data[[variable_to_map()]]))
+# 
+#     leafletProxy("COMap", data = map_data) %>%
+#       clearShapes() %>%
+#       clearControls() %>%
+#       addPolygons(color = ~pal(map_data[[variable_to_map()]]),
+#                   weight = 0.5,
+#                   fillOpacity = 0.5,
+#                   smoothFactor = 0.2) %>%
+#       addLegend(
+#         position = "bottomright",
+#         pal = pal,
+#         values = map_data[[variable_to_map()]]
+#       ) 
+#   })
+#     
+#    #define what happens when a shape is clicked. 
+#    showTractPopup <- function(TractID, lat, lng) {
+#     selectedTract <- map_data@data %>% filter(TractID == TractID)#[map_data@data$TractID == TractID,]
+#     content <- as.character(#tagList(
+#       paste0("Actual Vaccination Rate: ", as.numeric(selectedTract$Pediatric_Vax_Rate))#,
+#       #tags$br(),
+#       # sprintf("Predicted Vaccination Rate: %s%%", as.numeric(selectedTract$Prediction)), tags$br(),
+#       # sprintf("Barriers to Vaccination Score: %s%%", dollar(selectedTract$Barriers)), tags$br(),
+#       # sprintf("Benefits of Vaccination Score: %s%%", as.numeric(selectedTract$Benefits)), tags$br(),
+#       # sprintf("Cues to Vaccinate Score: %s%%", as.numeric(selectedTract$Cues)), tags$br(),
+#       # sprintf("Demographics / SES Score: %s%%", as.numeric(selectedTract$Demographic)), tags$br(),
+#       # sprintf("Perceived Susceptibility to COVID-19 Score: %s%%", as.numeric(selectedTract$Susceptibility))
+# 
+#     )#)
+#     leafletProxy("COMap") %>% addPopups(lng, lat, content, layerId = TractID)
+#   }
+#       # When map is clicked, show a popup with tracts info
+#   observe({
+#     leafletProxy("map") %>% clearPopups()
+#     event <- input$COMap_shape_click
+#     if (is.null(event))
+#       return()
+# 
+#     isolate({
+#       showTractPopup(event$id, event$lat, event$lng)
+#     })
+#     
+#   })
+#   
+# },
+# 
+#   options = list(height = 500)
+#   
+# )
+
+```
+
+## And that's it!
+
+Well, it for now. But I think it's really something to go on. Other things we can do would be to:
+
+* List the highest and lowest performing census tracts, counties, etc.
+* For each tract, figure out what is the most impactful factor
+* And maybe some other stuff.
+
+```{r}
+
+causal_formula <- PERCENT_VAX_0_17 ~
+
+
+           HPV+
+AllFlu+
+pctBiden+
+
+HHCOMP_AGE65+
+HHCOMP_AGE17+
+HHCOMP_DISABILITY+
+
+HHCOMP_SING_PARENT+
+HOUSING_NO_VEHICLE+
+UNINSURED+
+providers_county+
+
+SES_INCOME+
+MINORITY_MINORITY+
+MINORITY_NONENGLISH+
+HOUSING_MULTIUNIT+
+HOUSING_MOBILE+
+HOUSING_CROWDED
+
+causal_lm <- lm(causal_formula,data= model_data, weights = Under_18
+)
+
+causal_model_coefficients <- summary(causal_lm)$coefficients %>%
+  as.table() %>%
+  as.data.frame() %>%
+  `colnames<-`(c("Variable","Metric","Value")) %>%
+  filter(Metric %in% "Estimate",
+         "Variable" %!in% "(Intercept)") %>%
+  transmute(Variable = as.character(Variable),
+            Estimate = Value)
+
+Variable_pct <- Colorado_data_mr %>%
+  select(TractID,geometry,PERCENT_VAX_0_17,
+         
+         HPV,
+AllFlu,
+pctBiden,
+
+HHCOMP_AGE65,
+HHCOMP_AGE17,
+HHCOMP_DISABILITY,
+
+HHCOMP_SING_PARENT,
+HOUSING_NO_VEHICLE,
+UNINSURED,
+providers_county, 
+
+SES_INCOME,
+MINORITY_MINORITY,
+MINORITY_NONENGLISH,
+HOUSING_MULTIUNIT,
+HOUSING_MOBILE,
+HOUSING_CROWDED
+
+) %>%
+  mutate(across(HPV:HOUSING_CROWDED,
+                ~ percent_rank(.x),
+                .names = "{.col}_pct"))  %>%
+  ungroup()
+
+#Beliefs about vaccine
+Belief_pct <- Variable_pct %>%
+
+mutate(Belief_pct = percent_rank(
+  1.6399482*HPV_pct+
+   0.9658772* AllFlu_pct+
+   6.9716317* pctBiden_pct
+)) %>%
+  select(TractID,Belief_pct) %>%
+  ungroup()
+
+# Perceeived vulnerability
+Perc_Vuln_pct <- Variable_pct %>%
+
+mutate(Perc_Vuln_pct  = percent_rank(
+-1.9101984*(HHCOMP_AGE65)+
+-2.4255491*(HHCOMP_AGE17)+
+-1.5934949*(HHCOMP_DISABILITY)
+)) %>%
+  select(TractID,Perc_Vuln_pct) 
+
+#Healthcare access
+HC_access_pct <- Variable_pct %>%
+
+
+mutate(HC_access_pct = percent_rank(
+	
+-0.9933155*(HHCOMP_SING_PARENT)+
+1.7491666*(HOUSING_NO_VEHICLE)+
+-1.5112307*(UNINSURED)+
+-1.0896930*(providers_county)
+)
+) %>%
+select(HC_access_pct,TractID)
+
+#Socioeconomic disadvantage
+SE_Disadv_pct <- Variable_pct %>%
+
+
+mutate(SE_Disadv_pct = percent_rank(
+6.6225800*SES_INCOME+
+1.6585937*MINORITY_MINORITY+
+1.2855552*MINORITY_NONENGLISH+
+-2.1205045*HOUSING_MULTIUNIT+
+1.0820784*HOUSING_MOBILE+
+-0.9941021*HOUSING_CROWDED
+)) %>%
+select(SE_Disadv_pct,TractID)
+
+theme_vars <- Variable_pct %>%
+  select(geometry,TractID,PERCENT_VAX_0_17,ends_with("_pct")) %>%
+  left_join(Belief_pct, by = "TractID") %>%
+  left_join(Perc_Vuln_pct, by = "TractID") %>%
+  left_join(HC_access_pct, by = "TractID") %>%
+  left_join(SE_Disadv_pct, by = "TractID")
+
+themes_weight_model <- lm(PERCENT_VAX_0_17 ~ 
+                            Belief_pct +
+                            Perc_Vuln_pct+
+                            HC_access_pct+
+                            SE_Disadv_pct,
+                          data = theme_vars)
+
+print(
+  summary(
+    themes_weight_model
+  )
+)
+
+Pediatric_Vaccine_Index <- Variable_pct %>%
+  select(geometry,TractID,PERCENT_VAX_0_17,ends_with("_pct")) %>%
+  left_join(Belief_pct, by = "TractID") %>%
+  left_join(Perc_Vuln_pct, by = "TractID") %>%
+  left_join(HC_access_pct, by = "TractID") %>%
+  left_join(SE_Disadv_pct, by = "TractID") %>%
+  mutate(PVI_overall = percent_rank(
+  28.8738      *Belief_pct+
+  6.1546      *Perc_Vuln_pct+
+  4.3349      *HC_access_pct+
+  22.5008*SE_Disadv_pct
+  ))
+
+
+plot(Pediatric_Vaccine_Index$PERCENT_VAX_0_17,Pediatric_Vaccine_Index$PVI_overall)
+
+write_csv(Pediatric_Vaccine_Index %>% select(-geometry),"data/Pediatric_Vaccine_Index.csv")
+
+```
+
+
+
+```{r}
+
+
+
+Pediatric_Vaccine_Index %>%
+  ggplot(aes(fill = Belief_pct,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "D",
+      breaks=c(0,.25,.5,.75,1), name="Percentile", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Vaccine Belief",
+       subtitle = "Percentile Rank") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  ) 
+
+Pediatric_Vaccine_Index %>%
+  ggplot(aes(fill = Perc_Vuln_pct,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "C",
+      breaks=c(0,.25,.5,.75,1), name="Percentile", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Perceived Vulerability",
+       subtitle = "Percentile Rank") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  )  
+
+Pediatric_Vaccine_Index %>%
+  ggplot(aes(fill = HC_access_pct,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "B",
+      breaks=c(0,.25,.5,.75,1), name="Percentile", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Healthcare Access",
+       subtitle = "Percentile Rank") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  ) 
+
+Pediatric_Vaccine_Index %>%
+  ggplot(aes(fill = SE_Disadv_pct,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "A",
+      breaks=c(0,.25,.5,.75,1), name="Percentile", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Social Vulnerability Access",
+       subtitle = "Percentile Rank") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  )
+
+Pediatric_Vaccine_Index %>%
+  ggplot(aes(fill = PVI_overall,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(option = "E",
+      breaks=c(0,.25,.5,.75,1), name="Percentile", guide = guide_legend( keyheight = unit(5, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  labs(title = "Overall Vaccine Uptake",
+       subtitle = "Percentile Rank") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  )
+
+```
+
+```{r}
+# Colorado_data_mr %>%
+#   select(PERCENT_VAX_0_17,
+#          
+#          HPV,
+# AllFlu,
+# pctBiden,
+# 
+# HHCOMP_AGE65,
+# HHCOMP_AGE17,
+# HHCOMP_DISABILITY,
+# 
+# HHCOMP_SING_PARENT,
+# HOUSING_NO_VEHICLE,
+# UNINSURED,
+# providers_county, 
+# 
+# SES_INCOME,
+# MINORITY_MINORITY,
+# MINORITY_NONENGLISH,
+# HOUSING_MULTIUNIT,
+# HOUSING_MOBILE,
+# HOUSING_CROWDED
+# 
+# ) %>% plot()
+
+```
+
+```{r bidiretional error plot}
+# after https://www.datalorax.com/post/creating-bivariate-color-palettes/
+
+
+
+
+model_fit_graph_df  %>%
+  ggplot(aes(x=`model_error`)
+         ) +
+  geom_histogram(bins = 30) +
+  ylab("Census Tracts")+
+  xlab("Root Mean Square Error")+
+  labs(title = "Histogram of Model Error",
+       subtitle = "Greater Error indicates Greater Effect of Unexamined Variables") +
+  xlim(0,100)
+
+#install.packages("paletteer")
+library(paletteer)
+
+d <- expand.grid(x = seq(0, 1, 0.01), y = seq(0, 1, 0.01)) %>%
+  mutate(fill_val = atan(y/x),
+         transparency = x + y)
+
+d <- d %>%
+  mutate(mix1 = rgb(red = x, green = 0, blue = y)) %>%
+  mutate(mix2 = rgb(red = x, green = y, blue = 0.5))
+
+p <- ggplot(d, aes(x, y)) + 
+  geom_tile(aes(fill = mix2)) + 
+  scale_fill_identity()
+
+pal_d <- ggplot_build(p)$data[[1]] %>%
+  select(x, y, fill) %>%
+  mutate(x = as.character(x),
+         y = as.character(y))
+head(pal_d)  
+
+
+
+model_fit_diverging <- model_fit_graph_df %>%
+  select(TractID,geometry,model_prediction,model_error,PERCENT_VAX_0_17) %>%
+  mutate(x = as.character(round(scales::rescale(PERCENT_VAX_0_17), 2)),
+         y = as.character(round(scales::rescale(model_prediction), 2))) %>%
+  left_join(pal_d) 
+
+#install.packages(cowplot)
+library(cowplot)
+
+map <- ggplot(model_fit_diverging,aes(geometry = geometry,fill = fill)) +
+  geom_sf() +
+  guides(fill = "none")
+
+pal_d_discrete <- pal_d %>%
+  filter(x %in% c("0","0.33","0.67","1"),
+         y %in% c("0","0.33","0.67","1"))
+
+legend <- ggplot(pal_d_discrete, aes(x, y)) +
+  geom_tile(aes(fill = fill)) +
+  scale_fill_identity() +
+  labs(x = "Higher Vaccination Rate -->",
+       y = "Higher Predicted Vaccination Rate -->") +
+  theme_void() +
+  theme(axis.title = element_text(size = 8),
+  	    axis.title.y = element_text(angle = 90)) +
+  coord_fixed()
+
+ggdraw() +
+  draw_plot(map, 0, 0, 1, 1) +
+  draw_plot(legend, 0.02, 0.05, 0.3, 0.3)
+  
+
+ggarrange(map,legend,nrow = 1,ncol = 2, widths = c(3,1),heights = c(2,1),
+          labels = "AUTO",align = "h")
+
+```
+
+``` {r candidate counties for qualitative analysis}
+
+
+
+county_vax <- model_data %>%
+  mutate(model_prediction = predict(model_small)) %>%
+  # left_join(Colorado_data_mr %>%
+  #             select(POP_AGE_0_17,VAX_AGE_0_17,TractID),
+  #           ,by="TractID") %>% 
+  ungroup() %>%
+  mutate(PREDICT_VAX_AGE_0_17 = model_prediction*POP_AGE_0_17) %>%
+  group_by(COUNTY) %>%
+  summarize(
+            POP_AGE_0_17 = sum(POP_AGE_0_17),
+            VAX_AGE_0_17 = sum(VAX_AGE_0_17),
+            PREDICT_VAX_AGE_0_17 = sum(PREDICT_VAX_AGE_0_17)
+            ) %>%
+  mutate(PERCENT_VAX_AGE_0_17 = 100*VAX_AGE_0_17 / POP_AGE_0_17,
+         PREDICT_VAX_AGE_0_17 = PREDICT_VAX_AGE_0_17 / POP_AGE_0_17) %>%
+    filter(COUNTY %!in% 
+           c("LARIMER", "WELD", "BOULDER", "BROOMFIELD", "ADAMS", "ARAPAHOE", "DOUGLAS", "JEFFERSON", "DENVER", "EL PASO", "PUEBLO")
+          
+  ) 
+
+  
+
+county_kmeans_data <- SVI_county %>%
+    filter(STATE %in% "COLORADO",
+           toupper(COUNTY) %!in% 
+           c("LARIMER", "WELD", "BOULDER", "BROOMFIELD", "ADAMS", "ARAPAHOE", "DOUGLAS", "JEFFERSON", "DENVER", "EL PASO", "PUEBLO")
+          
+  ) %>%
+  transmute(COUNTY = toupper(COUNTY),
+            FIPS = FIPS,
+            TRACT_POP = E_TOTPOP,
+            HOUSING_UNITS = E_HU,
+            HOUSEHOLDS = E_HH,
+            SES_BELOW_POV = EP_POV,
+            SES_UNEMPLOYED = EP_UNEMP,
+            SES_INCOME = EP_PCI,
+            SES_NO_HS = EP_NOHSDP,
+            HHCOMP_AGE65 = EP_AGE65,
+            HHCOMP_AGE17 = EP_AGE17,
+            HHCOMP_DISABILITY = EP_DISABL,
+            HHCOMP_SING_PARENT = EP_SNGPNT,
+            MINORITY_MINORITY = EP_MINRTY,
+            MINORITY_NONENGLISH = EP_LIMENG,
+            HOUSING_MULTIUNIT = EP_MUNIT,
+            HOUSING_MOBILE = EP_MOBILE,
+            HOUSING_CROWDED = EP_CROWD,
+            HOUSING_NO_VEHICLE = EP_NOVEH,
+            HOUSING_GROUP_QUARTERS = EP_GROUPQ,
+            UNINSURED = EP_UNINSUR,
+            DAYTIME_POP = E_DAYPOP,
+            SES = SPL_THEME1,
+            HHCOMP = SPL_THEME2,
+            MINORITY = SPL_THEME3,
+            HOUSING = SPL_THEME4)  %>%
+  left_join(compiled_county_data %>%
+              select(COUNTY,
+                     HPV,
+                     AllFlu,
+                     pctBiden,
+                     providers_county)) %>%
+  select( COUNTY,HPV,
+AllFlu,
+pctBiden,
+
+HHCOMP_AGE65,
+HHCOMP_AGE17,
+HHCOMP_DISABILITY,
+
+HHCOMP_SING_PARENT,
+HOUSING_NO_VEHICLE,
+UNINSURED,
+providers_county, 
+
+SES_INCOME,
+MINORITY_MINORITY,
+MINORITY_NONENGLISH,
+HOUSING_MULTIUNIT,
+HOUSING_MOBILE,
+HOUSING_CROWDED
+
+)
+
+clusters <- kmeans(county_kmeans_data %>% select(-COUNTY) %>% scale(),centers = 4)
+
+county_vax <- county_vax %>%
+  mutate(cluster = clusters$cluster) %>%
+  mutate(error = (PERCENT_VAX_AGE_0_17 - PREDICT_VAX_AGE_0_17)/PERCENT_VAX_AGE_0_17)
+
+county_geom_with_age <- get_acs(
+  geography = "county",
+  state = "CO",
+  variables = c(
+    Under_18 = "B09001_001"
+    
+  ),
+  year = 2017,
+  geometry = TRUE
+) %>%
+  mutate(FIPS = GEOID) %>%
+  mutate(Under_18 = estimate) %>%
+  select(FIPS,geometry) %>%
+  left_join(compiled_county_data %>% select(COUNTY,FIPS),by="FIPS") %>%
+  left_join(county_vax,by="COUNTY") 
+              
+# Make a cluster table
+county_kmeans_data %>%
+  mutate(cluster = clusters$cluster) %>%
+  select(-COUNTY) %>%
+  group_by(cluster) %>%
+  summarize(across(everything(),median)) %>% t()
+
+county_kmeans_data %>%
+    mutate(cluster = clusters$cluster) %>%
+    group_by(cluster) %>%
+    summarize(counties = paste(list(COUNTY))) %>% view()
+
+county_geom_with_age %>%
+  mutate(Cluster = factor(cluster,levels = c("1","2","3","4"))) %>%
+  ggplot(aes(fill = Cluster,geometry = geometry)) +
+  geom_sf()+
+    theme_void() +
+    scale_fill_viridis(
+                       discrete = TRUE) +
+  labs(title = "County K-Means Cluster") +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.background = element_rect(fill = "#f5f5f2", color = NA),
+    panel.background = element_rect(fill = "#f5f5f2", color = NA),
+    legend.background = element_rect(fill = "#f5f5f2", color = NA),
+
+    plot.title = element_text(color = "#4e4d47"),
+    plot.subtitle = element_text(color = "#4e4d47"),
+    plot.caption = element_text( size=12, color = "#4e4d47"),
+
+    legend.position = "bottom"
+  )
+
+county_geom_with_age %>%
+  group_by(cluster) %>%
+  summarize(PERCENT_VAX_AGE_0_17 = mean(PERCENT_VAX_AGE_0_17),
+            PREDICT_VAX_AGE_0_17 = mean(PREDICT_VAX_AGE_0_17)
+  )
+
+county_geom_with_age %>%
+  group_by(cluster) %>%
+  filter(error == max(error) | error == min(error)) %>%
+  view()
+
+```
