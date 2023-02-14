@@ -1,0 +1,243 @@
+state,county,county_fips,year,pollutant,days_over_standard,person_days_over_standard,percent_days_over_standard
+Colorado,Adams,08001,1999,PM2.5,0,0,0
+Colorado,Adams,08001,2000,PM2.5,3,1055205,0.8
+Colorado,Adams,08001,2001,PM2.5,4,1437748,1.1
+Colorado,Adams,08001,2002,PM2.5,0,0,0
+Colorado,Adams,08001,2003,PM2.5,0,0,0
+Colorado,Adams,08001,2004,PM2.5,0,0,0
+Colorado,Adams,08001,2005,PM2.5,0,0,0
+Colorado,Adams,08001,2006,PM2.5,0,0,0
+Colorado,Adams,08001,2007,PM2.5,3,1247745,0.8
+Colorado,Adams,08001,2008,PM2.5,0,0,0
+Colorado,Adams,08001,2009,PM2.5,0,0,0
+Colorado,Adams,08001,2010,PM2.5,0,0,0
+Colorado,Adams,08001,2011,PM2.5,1,452208,0.3
+Colorado,Adams,08001,2012,PM2.5,0,0,0
+Colorado,Adams,08001,2013,PM2.5,0,0,0
+Colorado,Adams,08001,2014,PM2.5,2,960144,0.5
+Colorado,Adams,08001,2017,PM2.5,1,503890,0.3
+Colorado,Adams,08001,2018,PM2.5,1,511707,0.3
+Colorado,Arapahoe,08005,2000,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2001,PM2.5,4,2006684,1.1
+Colorado,Arapahoe,08005,2002,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2003,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2004,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2005,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2006,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2007,PM2.5,2,1091764,0.5
+Colorado,Arapahoe,08005,2008,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2009,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2010,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2011,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2012,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2013,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2014,PM2.5,2,1237664,0.5
+Colorado,Arapahoe,08005,2015,PM2.5,3,1891797,0.8
+Colorado,Arapahoe,08005,2016,PM2.5,0,0,0
+Colorado,Arapahoe,08005,2017,PM2.5,3,1932264,0.8
+Colorado,Arapahoe,08005,2018,PM2.5,0,0,0
+Colorado,Archuleta,08007,2002,PM2.5,0,0,0
+Colorado,Archuleta,08007,2003,PM2.5,0,0,0
+Colorado,Archuleta,08007,2004,PM2.5,0,0,0
+Colorado,Archuleta,08007,2006,PM2.5,0,0,0
+Colorado,Boulder,08013,1999,PM2.5,3,851772,0.8
+Colorado,Boulder,08013,2000,PM2.5,0,0,0
+Colorado,Boulder,08013,2001,PM2.5,3,850530,0.8
+Colorado,Boulder,08013,2002,PM2.5,0,0,0
+Colorado,Boulder,08013,2003,PM2.5,0,0,0
+Colorado,Boulder,08013,2004,PM2.5,0,0,0
+Colorado,Boulder,08013,2005,PM2.5,0,0,0
+Colorado,Boulder,08013,2006,PM2.5,0,0,0
+Colorado,Boulder,08013,2007,PM2.5,0,0,0
+Colorado,Boulder,08013,2008,PM2.5,0,0,0
+Colorado,Boulder,08013,2009,PM2.5,0,0,0
+Colorado,Boulder,08013,2010,PM2.5,0,0,0
+Colorado,Boulder,08013,2011,PM2.5,0,0,0
+Colorado,Boulder,08013,2012,PM2.5,0,0,0
+Colorado,Boulder,08013,2013,PM2.5,0,0,0
+Colorado,Boulder,08013,2014,PM2.5,2,626174,0.5
+Colorado,Boulder,08013,2015,PM2.5,1,318933,0.3
+Colorado,Boulder,08013,2016,PM2.5,0,0,0
+Colorado,Boulder,08013,2017,PM2.5,3,970101,0.8
+Colorado,Boulder,08013,2018,PM2.5,3,976911,0.8
+Colorado,Delta,08029,2002,PM2.5,0,0,0
+Colorado,Delta,08029,2003,PM2.5,0,0,0
+Colorado,Delta,08029,2004,PM2.5,0,0,0
+Colorado,Delta,08029,2005,PM2.5,0,0,0
+Colorado,Delta,08029,2006,PM2.5,0,0,0
+Colorado,Denver,08031,2000,PM2.5,2,1113476,0.6
+Colorado,Denver,08031,2001,PM2.5,4,2253200,1.1
+Colorado,Denver,08031,2002,PM2.5,0,0,0
+Colorado,Denver,08031,2003,PM2.5,0,0,0
+Colorado,Denver,08031,2004,PM2.5,0,0,0
+Colorado,Denver,08031,2005,PM2.5,0,0,0
+Colorado,Denver,08031,2006,PM2.5,0,0,0
+Colorado,Denver,08031,2007,PM2.5,4,2281748,1.1
+Colorado,Denver,08031,2008,PM2.5,0,0,0
+Colorado,Denver,08031,2009,PM2.5,0,0,0
+Colorado,Denver,08031,2010,PM2.5,0,0,0
+Colorado,Denver,08031,2011,PM2.5,1,622085,0.3
+Colorado,Denver,08031,2012,PM2.5,0,0,0
+Colorado,Denver,08031,2013,PM2.5,0,0,0
+Colorado,Denver,08031,2014,PM2.5,2,1332142,0.5
+Colorado,Denver,08031,2015,PM2.5,3,2054478,0.8
+Colorado,Denver,08031,2016,PM2.5,0,0,0
+Colorado,Denver,08031,2017,PM2.5,2,1413230,0.6
+Colorado,Denver,08031,2018,PM2.5,2,1436368,0.6
+Colorado,Douglas,08035,2001,PM2.5,2,398076,0.5
+Colorado,Douglas,08035,2006,PM2.5,0,0,0
+Colorado,Douglas,08035,2007,PM2.5,1,268599,0.3
+Colorado,Douglas,08035,2008,PM2.5,0,0,0
+Colorado,Douglas,08035,2009,PM2.5,0,0,0
+Colorado,Douglas,08035,2010,PM2.5,0,0,0
+Colorado,Douglas,08035,2011,PM2.5,0,0,0
+Colorado,Douglas,08035,2012,PM2.5,0,0,0
+Colorado,Douglas,08035,2013,PM2.5,0,0,0
+Colorado,Douglas,08035,2014,PM2.5,2,629636,0.5
+Colorado,Douglas,08035,2015,PM2.5,1,322319,0.3
+Colorado,Douglas,08035,2016,PM2.5,0,0,0
+Colorado,Douglas,08035,2017,PM2.5,1,336149,0.4
+Colorado,Douglas,08035,2018,PM2.5,3,1029978,0.8
+Colorado,El Paso,08041,2000,PM2.5,0,0,0
+Colorado,El Paso,08041,2001,PM2.5,0,0,0
+Colorado,El Paso,08041,2002,PM2.5,0,0,0
+Colorado,El Paso,08041,2003,PM2.5,0,0,0
+Colorado,El Paso,08041,2004,PM2.5,0,0,0
+Colorado,El Paso,08041,2005,PM2.5,0,0,0
+Colorado,El Paso,08041,2006,PM2.5,0,0,0
+Colorado,El Paso,08041,2007,PM2.5,0,0,0
+Colorado,El Paso,08041,2008,PM2.5,0,0,0
+Colorado,El Paso,08041,2009,PM2.5,0,0,0
+Colorado,El Paso,08041,2010,PM2.5,0,0,0
+Colorado,El Paso,08041,2011,PM2.5,0,0,0
+Colorado,El Paso,08041,2012,PM2.5,0,0,0
+Colorado,El Paso,08041,2013,PM2.5,0,0,0
+Colorado,El Paso,08041,2014,PM2.5,0,0,0
+Colorado,El Paso,08041,2015,PM2.5,2,1351290,0.5
+Colorado,El Paso,08041,2016,PM2.5,0,0,0
+Colorado,El Paso,08041,2017,PM2.5,1,701363,0.3
+Colorado,El Paso,08041,2018,PM2.5,1,714386,0.3
+Colorado,Elbert,08039,2000,PM2.5,0,0,0
+Colorado,Elbert,08039,2001,PM2.5,1,21294,0.3
+Colorado,Elbert,08039,2002,PM2.5,0,0,0
+Colorado,Elbert,08039,2003,PM2.5,0,0,0
+Colorado,Elbert,08039,2004,PM2.5,0,0,0
+Colorado,Elbert,08039,2005,PM2.5,0,0,0
+Colorado,Elbert,08039,2008,PM2.5,0,0,0
+Colorado,Elbert,08039,2009,PM2.5,0,0,0
+Colorado,Elbert,08039,2010,PM2.5,0,0,0
+Colorado,Garfield,08045,2015,PM2.5,0,0,0
+Colorado,Garfield,08045,2016,PM2.5,0,0,0
+Colorado,Garfield,08045,2017,PM2.5,0,0,0
+Colorado,Garfield,08045,2018,PM2.5,0,0,0
+Colorado,Gunnison,08051,2000,PM2.5,0,0,0
+Colorado,Gunnison,08051,2001,PM2.5,0,0,0
+Colorado,Gunnison,08051,2002,PM2.5,0,0,0
+Colorado,Gunnison,08051,2003,PM2.5,0,0,0
+Colorado,Gunnison,08051,2004,PM2.5,0,0,0
+Colorado,Gunnison,08051,2006,PM2.5,0,0,0
+Colorado,La Plata,08067,2000,PM2.5,0,0,0
+Colorado,La Plata,08067,2001,PM2.5,0,0,0
+Colorado,La Plata,08067,2002,PM2.5,11,506979,3
+Colorado,La Plata,08067,2003,PM2.5,0,0,0
+Colorado,La Plata,08067,2010,PM2.5,0,0,0
+Colorado,La Plata,08067,2015,PM2.5,0,0,0
+Colorado,La Plata,08067,2016,PM2.5,0,0,0
+Colorado,La Plata,08067,2017,PM2.5,0,0,0
+Colorado,La Plata,08067,2018,PM2.5,22,1240162,6.1
+Colorado,Larimer,08069,2000,PM2.5,0,0,0
+Colorado,Larimer,08069,2001,PM2.5,1,260911,0.3
+Colorado,Larimer,08069,2002,PM2.5,0,0,0
+Colorado,Larimer,08069,2003,PM2.5,0,0,0
+Colorado,Larimer,08069,2004,PM2.5,0,0,0
+Colorado,Larimer,08069,2005,PM2.5,0,0,0
+Colorado,Larimer,08069,2006,PM2.5,0,0,0
+Colorado,Larimer,08069,2007,PM2.5,0,0,0
+Colorado,Larimer,08069,2008,PM2.5,0,0,0
+Colorado,Larimer,08069,2009,PM2.5,0,0,0
+Colorado,Larimer,08069,2010,PM2.5,0,0,0
+Colorado,Larimer,08069,2011,PM2.5,0,0,0
+Colorado,Larimer,08069,2012,PM2.5,0,0,0
+Colorado,Larimer,08069,2013,PM2.5,0,0,0
+Colorado,Larimer,08069,2014,PM2.5,2,648298,0.5
+Colorado,Larimer,08069,2015,PM2.5,1,333473,0.3
+Colorado,Larimer,08069,2016,PM2.5,0,0,0
+Colorado,Larimer,08069,2017,PM2.5,1,344267,0.3
+Colorado,Larimer,08069,2018,PM2.5,1,350842,0.3
+Colorado,Mesa,08077,1999,PM2.5,0,0,0
+Colorado,Mesa,08077,2000,PM2.5,0,0,0
+Colorado,Mesa,08077,2001,PM2.5,0,0,0
+Colorado,Mesa,08077,2002,PM2.5,0,0,0
+Colorado,Mesa,08077,2003,PM2.5,0,0,0
+Colorado,Mesa,08077,2004,PM2.5,0,0,0
+Colorado,Mesa,08077,2005,PM2.5,0,0,0
+Colorado,Mesa,08077,2006,PM2.5,0,0,0
+Colorado,Mesa,08077,2007,PM2.5,0,0,0
+Colorado,Mesa,08077,2008,PM2.5,0,0,0
+Colorado,Mesa,08077,2009,PM2.5,3,434385,0.8
+Colorado,Mesa,08077,2010,PM2.5,2,294310,0.5
+Colorado,Mesa,08077,2011,PM2.5,0,0,0
+Colorado,Mesa,08077,2012,PM2.5,0,0,0
+Colorado,Mesa,08077,2013,PM2.5,1,147885,0.3
+Colorado,Mesa,08077,2014,PM2.5,0,0,0
+Colorado,Mesa,08077,2015,PM2.5,0,0,0
+Colorado,Mesa,08077,2016,PM2.5,0,0,0
+Colorado,Mesa,08077,2017,PM2.5,0,0,0
+Colorado,Mesa,08077,2018,PM2.5,0,0,0
+Colorado,Montezuma,08083,2009,PM2.5,0,0,0
+Colorado,Montezuma,08083,2010,PM2.5,0,0,0
+Colorado,Montezuma,08083,2011,PM2.5,0,0,0
+Colorado,Montezuma,08083,2012,PM2.5,0,0,0
+Colorado,Montezuma,08083,2013,PM2.5,0,0,0
+Colorado,Montezuma,08083,2014,PM2.5,0,0,0
+Colorado,Park,08093,2016,PM2.5,0,0,0
+Colorado,Park,08093,2017,PM2.5,2,35764,0.6
+Colorado,Pueblo,08101,2000,PM2.5,0,0,0
+Colorado,Pueblo,08101,2001,PM2.5,0,0,0
+Colorado,Pueblo,08101,2002,PM2.5,0,0,0
+Colorado,Pueblo,08101,2003,PM2.5,0,0,0
+Colorado,Pueblo,08101,2004,PM2.5,0,0,0
+Colorado,Pueblo,08101,2005,PM2.5,0,0,0
+Colorado,Pueblo,08101,2006,PM2.5,0,0,0
+Colorado,Pueblo,08101,2007,PM2.5,0,0,0
+Colorado,Pueblo,08101,2008,PM2.5,0,0,0
+Colorado,Pueblo,08101,2010,PM2.5,0,0,0
+Colorado,Pueblo,08101,2011,PM2.5,0,0,0
+Colorado,Pueblo,08101,2012,PM2.5,0,0,0
+Colorado,Pueblo,08101,2013,PM2.5,0,0,0
+Colorado,Pueblo,08101,2014,PM2.5,0,0,0
+Colorado,Pueblo,08101,2015,PM2.5,0,0,0
+Colorado,Pueblo,08101,2016,PM2.5,0,0,0
+Colorado,Pueblo,08101,2017,PM2.5,3,497886,0.9
+Colorado,Pueblo,08101,2018,PM2.5,0,0,0
+Colorado,Rio Blanco,08103,2015,PM2.5,0,0,0
+Colorado,Rio Blanco,08103,2016,PM2.5,0,0,0
+Colorado,Rio Blanco,08103,2017,PM2.5,0,0,0
+Colorado,Rio Blanco,08103,2018,PM2.5,0,0,0
+Colorado,Routt,08107,2001,PM2.5,0,0,0
+Colorado,Routt,08107,2002,PM2.5,2,41784,0.5
+Colorado,Routt,08107,2003,PM2.5,0,0,0
+Colorado,San Miguel,08113,2001,PM2.5,1,6900,0.3
+Colorado,San Miguel,08113,2002,PM2.5,5,35210,1.4
+Colorado,San Miguel,08113,2003,PM2.5,0,0,0
+Colorado,San Miguel,08113,2005,PM2.5,0,0,0
+Colorado,Weld,08123,1999,PM2.5,0,0,0
+Colorado,Weld,08123,2000,PM2.5,3,549228,0.8
+Colorado,Weld,08123,2001,PM2.5,3,577446,0.8
+Colorado,Weld,08123,2002,PM2.5,0,0,0
+Colorado,Weld,08123,2003,PM2.5,0,0,0
+Colorado,Weld,08123,2004,PM2.5,0,0,0
+Colorado,Weld,08123,2005,PM2.5,0,0,0
+Colorado,Weld,08123,2006,PM2.5,0,0,0
+Colorado,Weld,08123,2007,PM2.5,3,714837,0.8
+Colorado,Weld,08123,2008,PM2.5,0,0,0
+Colorado,Weld,08123,2009,PM2.5,0,0,0
+Colorado,Weld,08123,2010,PM2.5,0,0,0
+Colorado,Weld,08123,2011,PM2.5,0,0,0
+Colorado,Weld,08123,2012,PM2.5,1,264122,0.3
+Colorado,Weld,08123,2013,PM2.5,0,0,0
+Colorado,Weld,08123,2014,PM2.5,2,552088,0.5
+Colorado,Weld,08123,2015,PM2.5,3,855081,0.8
+Colorado,Weld,08123,2016,PM2.5,3,884601,0.8
+Colorado,Weld,08123,2017,PM2.5,2,610176,0.6
+Colorado,Weld,08123,2018,PM2.5,3,942507,0.8

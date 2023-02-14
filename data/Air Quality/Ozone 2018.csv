@@ -1,0 +1,269 @@
+state,county,county_fips,year,pollutant,days_over_standard,person_days_over_standard
+Colorado,Adams,08001,1999,O3,4,1421232
+Colorado,Adams,08001,2000,O3,0,0
+Colorado,Adams,08001,2001,O3,0,0
+Colorado,Adams,08001,2002,O3,2,742362
+Colorado,Adams,08001,2003,O3,0,0
+Colorado,Adams,08001,2004,O3,0,0
+Colorado,Adams,08001,2005,O3,7,2767688
+Colorado,Adams,08001,2006,O3,1,407587
+Colorado,Adams,08001,2007,O3,3,1247745
+Colorado,Adams,08001,2008,O3,14,5951932
+Colorado,Adams,08001,2009,O3,6,2617938
+Colorado,Adams,08001,2011,O3,12,5426496
+Colorado,Adams,08001,2012,O3,7,3223773
+Colorado,Adams,08001,2013,O3,14,6579944
+Colorado,Adams,08001,2014,O3,2,960144
+Colorado,Adams,08001,2015,O3,3,1471686
+Colorado,Adams,08001,2016,O3,1,498007
+Colorado,Adams,08001,2017,O3,1,503890
+Colorado,Adams,08001,2018,O3,1,511707
+Colorado,Arapahoe,08005,1999,O3,10,4813060
+Colorado,Arapahoe,08005,2000,O3,17,8342274
+Colorado,Arapahoe,08005,2001,O3,10,5016710
+Colorado,Arapahoe,08005,2002,O3,17,8678551
+Colorado,Arapahoe,08005,2003,O3,28,14457912
+Colorado,Arapahoe,08005,2004,O3,6,3142290
+Colorado,Arapahoe,08005,2005,O3,19,10036066
+Colorado,Arapahoe,08005,2006,O3,31,16617581
+Colorado,Arapahoe,08005,2007,O3,10,5458820
+Colorado,Arapahoe,08005,2009,O3,4,2265920
+Colorado,Arapahoe,08005,2010,O3,7,4023733
+Colorado,Arapahoe,08005,2011,O3,23,13476620
+Colorado,Arapahoe,08005,2012,O3,24,14315976
+Colorado,Arapahoe,08005,2013,O3,18,10948716
+Colorado,Arapahoe,08005,2014,O3,1,618832
+Colorado,Arapahoe,08005,2015,O3,2,1261198
+Colorado,Arapahoe,08005,2016,O3,6,3831078
+Colorado,Arapahoe,08005,2017,O3,7,4508616
+Colorado,Arapahoe,08005,2018,O3,15,9775650
+Colorado,Archuleta,08007,2018,O3,0,0
+Colorado,Boulder,08013,1999,O3,5,1419620
+Colorado,Boulder,08013,2000,O3,5,1381275
+Colorado,Boulder,08013,2001,O3,4,1134040
+Colorado,Boulder,08013,2002,O3,11,3128763
+Colorado,Boulder,08013,2003,O3,23,6503549
+Colorado,Boulder,08013,2004,O3,0,0
+Colorado,Boulder,08013,2005,O3,8,2263280
+Colorado,Boulder,08013,2006,O3,19,5436527
+Colorado,Boulder,08013,2007,O3,22,6352654
+Colorado,Boulder,08013,2008,O3,14,4085578
+Colorado,Boulder,08013,2009,O3,5,1468205
+Colorado,Boulder,08013,2010,O3,6,1773630
+Colorado,Boulder,08013,2011,O3,14,4203318
+Colorado,Boulder,08013,2012,O3,19,5801004
+Colorado,Boulder,08013,2013,O3,13,4030689
+Colorado,Boulder,08013,2014,O3,3,939261
+Colorado,Boulder,08013,2015,O3,7,2232531
+Colorado,Boulder,08013,2017,O3,10,3233670
+Colorado,Boulder,08013,2018,O3,29,9443473
+Colorado,Clear Creek,08019,2015,O3,2,18578
+Colorado,Clear Creek,08019,2017,O3,2,19228
+Colorado,Clear Creek,08019,2018,O3,13,125476
+Colorado,Denver,08031,1999,O3,2,1091034
+Colorado,Denver,08031,2000,O3,4,2226952
+Colorado,Denver,08031,2001,O3,5,2816500
+Colorado,Denver,08031,2002,O3,7,3913630
+Colorado,Denver,08031,2003,O3,15,8405220
+Colorado,Denver,08031,2004,O3,0,0
+Colorado,Denver,08031,2005,O3,7,3916213
+Colorado,Denver,08031,2006,O3,10,5628620
+Colorado,Denver,08031,2007,O3,9,5133933
+Colorado,Denver,08031,2008,O3,5,2909515
+Colorado,Denver,08031,2009,O3,0,0
+Colorado,Denver,08031,2010,O3,3,1814637
+Colorado,Denver,08031,2011,O3,10,6220850
+Colorado,Denver,08031,2012,O3,14,8912890
+Colorado,Denver,08031,2013,O3,4,2603504
+Colorado,Denver,08031,2014,O3,0,0
+Colorado,Denver,08031,2015,O3,4,2739304
+Colorado,Denver,08031,2016,O3,3,2093232
+Colorado,Denver,08031,2017,O3,0,0
+Colorado,Denver,08031,2018,O3,7,5027288
+Colorado,Douglas,08035,2004,O3,10,2336460
+Colorado,Douglas,08035,2005,O3,28,6844376
+Colorado,Douglas,08035,2006,O3,41,10571153
+Colorado,Douglas,08035,2007,O3,23,6177777
+Colorado,Douglas,08035,2008,O3,17,4704580
+Colorado,Douglas,08035,2009,O3,7,1975141
+Colorado,Douglas,08035,2010,O3,13,3732612
+Colorado,Douglas,08035,2011,O3,22,6439026
+Colorado,Douglas,08035,2012,O3,36,10758744
+Colorado,Douglas,08035,2013,O3,25,7662250
+Colorado,Douglas,08035,2014,O3,8,2518544
+Colorado,Douglas,08035,2015,O3,11,3545509
+Colorado,Douglas,08035,2016,O3,16,5256768
+Colorado,Douglas,08035,2017,O3,17,5714533
+Colorado,Douglas,08035,2018,O3,24,8239824
+Colorado,El Paso,08041,1999,O3,1,508815
+Colorado,El Paso,08041,2000,O3,3,1559406
+Colorado,El Paso,08041,2001,O3,3,1609008
+Colorado,El Paso,08041,2002,O3,7,3816680
+Colorado,El Paso,08041,2003,O3,13,7171684
+Colorado,El Paso,08041,2004,O3,3,1675365
+Colorado,El Paso,08041,2005,O3,14,7970508
+Colorado,El Paso,08041,2006,O3,16,9320032
+Colorado,El Paso,08041,2007,O3,10,5887720
+Colorado,El Paso,08041,2008,O3,6,3594360
+Colorado,El Paso,08041,2009,O3,1,608518
+Colorado,El Paso,08041,2010,O3,4,2508928
+Colorado,El Paso,08041,2011,O3,10,6386400
+Colorado,El Paso,08041,2012,O3,20,12948580
+Colorado,El Paso,08041,2013,O3,10,6567740
+Colorado,El Paso,08041,2014,O3,0,0
+Colorado,El Paso,08041,2015,O3,1,675645
+Colorado,El Paso,08041,2016,O3,2,1378962
+Colorado,El Paso,08041,2017,O3,2,1402726
+Colorado,El Paso,08041,2018,O3,7,5000702
+Colorado,Garfield,08045,2007,O3,0,0
+Colorado,Garfield,08045,2009,O3,0,0
+Colorado,Garfield,08045,2010,O3,0,0
+Colorado,Garfield,08045,2011,O3,0,0
+Colorado,Garfield,08045,2012,O3,2,113690
+Colorado,Garfield,08045,2013,O3,0,0
+Colorado,Garfield,08045,2014,O3,0,0
+Colorado,Garfield,08045,2015,O3,0,0
+Colorado,Garfield,08045,2016,O3,0,0
+Colorado,Garfield,08045,2017,O3,0,0
+Colorado,Garfield,08045,2018,O3,1,59827
+Colorado,Gunnison,08051,2012,O3,3,46179
+Colorado,Gunnison,08051,2013,O3,0,0
+Colorado,Gunnison,08051,2014,O3,0,0
+Colorado,Gunnison,08051,2015,O3,1,16134
+Colorado,Gunnison,08051,2016,O3,0,0
+Colorado,Gunnison,08051,2017,O3,1,16891
+Colorado,Gunnison,08051,2018,O3,2,34376
+Colorado,Jackson,08057,2012,O3,0,0
+Colorado,Jackson,08057,2013,O3,1,1336
+Colorado,Jackson,08057,2014,O3,0,0
+Colorado,Jackson,08057,2015,O3,0,0
+Colorado,Jefferson,08059,1999,O3,23,11978630
+Colorado,Jefferson,08059,2000,O3,39,20542002
+Colorado,Jefferson,08059,2001,O3,25,13201675
+Colorado,Jefferson,08059,2002,O3,39,20574021
+Colorado,Jefferson,08059,2003,O3,46,24169734
+Colorado,Jefferson,08059,2004,O3,17,8922892
+Colorado,Jefferson,08059,2005,O3,24,12564408
+Colorado,Jefferson,08059,2006,O3,48,25179792
+Colorado,Jefferson,08059,2007,O3,43,22666160
+Colorado,Jefferson,08059,2008,O3,29,15386385
+Colorado,Jefferson,08059,2009,O3,10,5326060
+Colorado,Jefferson,08059,2010,O3,25,13391275
+Colorado,Jefferson,08059,2011,O3,36,19462212
+Colorado,Jefferson,08059,2012,O3,52,28424032
+Colorado,Jefferson,08059,2013,O3,35,19327245
+Colorado,Jefferson,08059,2014,O3,16,8943760
+Colorado,Jefferson,08059,2015,O3,17,9607006
+Colorado,Jefferson,08059,2016,O3,20,11432960
+Colorado,Jefferson,08059,2017,O3,28,16120216
+Colorado,Jefferson,08059,2018,O3,37,21446717
+Colorado,La Plata,08067,1999,O3,5,213785
+Colorado,La Plata,08067,2000,O3,0,0
+Colorado,La Plata,08067,2001,O3,0,0
+Colorado,La Plata,08067,2002,O3,0,0
+Colorado,La Plata,08067,2003,O3,0,0
+Colorado,La Plata,08067,2004,O3,0,0
+Colorado,La Plata,08067,2005,O3,2,95426
+Colorado,La Plata,08067,2006,O3,1,48408
+Colorado,La Plata,08067,2007,O3,6,294876
+Colorado,La Plata,08067,2008,O3,5,250365
+Colorado,La Plata,08067,2009,O3,4,203036
+Colorado,La Plata,08067,2010,O3,8,411528
+Colorado,La Plata,08067,2011,O3,10,518990
+Colorado,La Plata,08067,2012,O3,2,104996
+Colorado,La Plata,08067,2013,O3,4,213660
+Colorado,La Plata,08067,2014,O3,1,53924
+Colorado,La Plata,08067,2015,O3,2,109516
+Colorado,La Plata,08067,2016,O3,7,387898
+Colorado,La Plata,08067,2017,O3,4,222584
+Colorado,La Plata,08067,2018,O3,5,281855
+Colorado,Larimer,08069,1999,O3,7,1723092
+Colorado,Larimer,08069,2000,O3,22,5567936
+Colorado,Larimer,08069,2001,O3,4,1043644
+Colorado,Larimer,08069,2002,O3,42,11179182
+Colorado,Larimer,08069,2003,O3,34,9116964
+Colorado,Larimer,08069,2004,O3,9,2459421
+Colorado,Larimer,08069,2005,O3,11,3034603
+Colorado,Larimer,08069,2006,O3,38,10679026
+Colorado,Larimer,08069,2007,O3,35,10036390
+Colorado,Larimer,08069,2008,O3,20,5847880
+Colorado,Larimer,08069,2009,O3,8,2380016
+Colorado,Larimer,08069,2010,O3,21,6311172
+Colorado,Larimer,08069,2011,O3,32,9771200
+Colorado,Larimer,08069,2012,O3,49,15237040
+Colorado,Larimer,08069,2013,O3,27,8541639
+Colorado,Larimer,08069,2014,O3,16,5186384
+Colorado,Larimer,08069,2015,O3,14,4668622
+Colorado,Larimer,08069,2016,O3,8,2713456
+Colorado,Larimer,08069,2017,O3,10,3442670
+Colorado,Larimer,08069,2018,O3,27,9472734
+Colorado,Mesa,08077,2009,O3,0,0
+Colorado,Mesa,08077,2010,O3,0,0
+Colorado,Mesa,08077,2011,O3,0,0
+Colorado,Mesa,08077,2012,O3,6,887634
+Colorado,Mesa,08077,2013,O3,0,0
+Colorado,Mesa,08077,2014,O3,0,0
+Colorado,Mesa,08077,2015,O3,0,0
+Colorado,Mesa,08077,2016,O3,0,0
+Colorado,Mesa,08077,2017,O3,0,0
+Colorado,Mesa,08077,2018,O3,3,461166
+Colorado,Moffat,08081,2012,O3,1,13183
+Colorado,Moffat,08081,2013,O3,0,0
+Colorado,Moffat,08081,2016,O3,0,0
+Colorado,Moffat,08081,2017,O3,0,0
+Colorado,Moffat,08081,2018,O3,1,13192
+Colorado,Montezuma,08083,1999,O3,3,70572
+Colorado,Montezuma,08083,2000,O3,9,214668
+Colorado,Montezuma,08083,2001,O3,1,23873
+Colorado,Montezuma,08083,2002,O3,1,24109
+Colorado,Montezuma,08083,2003,O3,1,24378
+Colorado,Montezuma,08083,2004,O3,2,49214
+Colorado,Montezuma,08083,2005,O3,10,246030
+Colorado,Montezuma,08083,2006,O3,7,175119
+Colorado,Montezuma,08083,2007,O3,3,75531
+Colorado,Montezuma,08083,2008,O3,1,25200
+Colorado,Montezuma,08083,2009,O3,2,50730
+Colorado,Montezuma,08083,2010,O3,1,25532
+Colorado,Montezuma,08083,2011,O3,5,127170
+Colorado,Montezuma,08083,2012,O3,2,50878
+Colorado,Montezuma,08083,2013,O3,0,0
+Colorado,Montezuma,08083,2014,O3,0,0
+Colorado,Montezuma,08083,2015,O3,0,0
+Colorado,Montezuma,08083,2016,O3,0,0
+Colorado,Montezuma,08083,2017,O3,1,26098
+Colorado,Montezuma,08083,2018,O3,4,104580
+Colorado,Montrose,08085,2017,O3,0,0
+Colorado,Montrose,08085,2018,O3,1,42265
+Colorado,Park,08093,2016,O3,0,0
+Colorado,Park,08093,2017,O3,1,17882
+Colorado,Pitkin,08097,2010,O3,0,0
+Colorado,Pitkin,08097,2011,O3,0,0
+Colorado,Rio Blanco,08103,2010,O3,2,13234
+Colorado,Rio Blanco,08103,2011,O3,4,26940
+Colorado,Rio Blanco,08103,2012,O3,2,13518
+Colorado,Rio Blanco,08103,2013,O3,13,87100
+Colorado,Rio Blanco,08103,2014,O3,0,0
+Colorado,Rio Blanco,08103,2015,O3,0,0
+Colorado,Rio Blanco,08103,2016,O3,0,0
+Colorado,Rio Blanco,08103,2017,O3,0,0
+Colorado,Rio Blanco,08103,2018,O3,2,12666
+Colorado,Weld,08123,1999,O3,3,531795
+Colorado,Weld,08123,2000,O3,3,549228
+Colorado,Weld,08123,2001,O3,5,962410
+Colorado,Weld,08123,2002,O3,17,3382575
+Colorado,Weld,08123,2003,O3,27,5593239
+Colorado,Weld,08123,2004,O3,2,428138
+Colorado,Weld,08123,2005,O3,19,4245208
+Colorado,Weld,08123,2006,O3,26,6013358
+Colorado,Weld,08123,2007,O3,14,3335906
+Colorado,Weld,08123,2008,O3,8,1952928
+Colorado,Weld,08123,2009,O3,1,248959
+Colorado,Weld,08123,2010,O3,7,1779610
+Colorado,Weld,08123,2011,O3,11,2847196
+Colorado,Weld,08123,2012,O3,17,4490074
+Colorado,Weld,08123,2013,O3,10,2701640
+Colorado,Weld,08123,2014,O3,1,276044
+Colorado,Weld,08123,2015,O3,6,1710162
+Colorado,Weld,08123,2016,O3,1,294867
+Colorado,Weld,08123,2017,O3,6,1830528
+Colorado,Weld,08123,2018,O3,7,2199183
